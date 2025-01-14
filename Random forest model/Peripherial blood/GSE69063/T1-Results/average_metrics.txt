@@ -1,0 +1,3 @@
+Average Metrics Over 100 Splits:
+      MCC        F1       AUC       TPR       TNR       PPV       NPV 
+0.9563924 0.9685714 0.9991667 0.9450000 1.0000000 1.0000000 0.9685714 

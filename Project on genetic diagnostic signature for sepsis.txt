@@ -1,0 +1,58 @@
+﻿Project on genetic diagnostic signature for sepsis
+
+
+2024-11-04
+By Davide Chicco
+davide.chicco@unimib.it
+
+
+
+
+The goal of this project is to identify a genetic diagnostic signature from the scientific literature and to apply its list of genes, with machine learning, to microarray gene expression datasets to test its effectiveness.
+
+
+The general idea is to repeat the analysis described the following article:
+
+
+D. Chicco, T. Sanavia, and G. Jurman, "Signature literature review reveals AHCY, DPYSL3, and NME1 as the most recurrent prognostic genes for neuroblastoma". BioData Mining 16, 7 (2023).
+https://doi.org/10.1186/s13040-023-00325-1
+
+
+The main steps are the following:
+
+
+
+
+1) Signature detection. The student needs to look for published articles on wet-lab validated diagnostic signatures for sepsis, and to count the occurrences of the genes in these signatures.
+The student needs to double-check the aliases of the genes found through g:Profiler’s g:Convert https://biit.cs.ut.ee/gprofiler/convert 
+Articles based on computational models should be discarded.
+The output of this phase should be a list of genes known to be predictive of the diagnosis of sepsis.
+
+
+2) Signature application. In this step, the student needs to look for microarray gene expression datasets of sepsis on GEO, and then to apply the designed signature to them.
+In each dataset, the student needs to select only the columns related to the signature’s genes, and a target saying “healthy control” or “sick” for each patient.
+The student needs then to first apply biostatistics tests such as Mann-Whitney U test to assess the association between each gene and the target column, and then machine learning methods such as Random Forests for the target prediction.
+
+
+
+
+
+
+All the software code must be saved through Git e GitHub:
+
+
+Blischak JD, Davenport ER, Wilson G (2016) “A quick introduction to version control with Git and GitHub”. PLOS Computational Biology 12(1): e1004668. https://doi.org/10.1371/journal.pcbi.1004668 
+
+
+Perez-Riverol Y, Gatto L, Wang R, Sachsenberg T, Uszkoreit J, Leprevost FdV, et al. (2016) “Ten simple rules for taking advantage of Git and GitHub”. PLOS Computational Biology 12(7): e1004947. https://doi.org/10.1371/journal.pcbi.1004947 
+
+
+
+
+Guidelines to follow for software code arrangement and notebook writing:
+
+
+William Stafford Noble (2009) "A quick guide to organizing computational biology projects". PLOS Computational Biology 5(7): e1000424. https://doi.org/10.1371/journal.pcbi.1000424
+
+
+Santiago Schnell (2015) "Ten simple rules for a computational biologist’s laboratory notebook". PLOS Computational Biology 11(9): e1004385. https://doi.org/10.1371/journal.pcbi.1004385
