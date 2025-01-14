@@ -1,0 +1,12 @@
+
+Call:
+ randomForest(formula = Label ~ ., data = train_data, ntree = 500,      mtry = sqrt(ncol(train_data) - 1), importance = TRUE) 
+               Type of random forest: classification
+                     Number of trees: 500
+No. of variables tried at each split: 7
+
+        OOB estimate of  error rate: 2.08%
+Confusion matrix:
+                Healthy control Sepsis class.error
+Healthy control              32      0      0.0000
+Sepsis                        1     15      0.0625
