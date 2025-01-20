@@ -70,11 +70,20 @@ for (i in 1:n_repeats) {
 
 # Save detailed results
 write.csv(results, "repeated_splits_metrics.csv", row.names = FALSE)
-
 # Average metrics
 average_metrics <- colMeans(results, na.rm = TRUE)
-cat("Average Metrics:\n", average_metrics, "\n")
-write.csv(average_metrics, "average_metrics.csv", row.names = FALSE)
+cat("Average Metrics:\n")
+for (i in seq_along(average_metrics)) {
+  cat(names(average_metrics)[i], ":", average_metrics[i], "\n")
+}
+
+# Create a data frame for the average metrics
+average_metrics_df <- data.frame(
+  Metric = names(average_metrics),
+  Value = average_metrics
+)
+
+write.csv(average_metrics_df, "average_metrics.csv", row.names = FALSE)
 ################################################################################
 # Feature Removal Analysis
 ################################################################################
@@ -155,9 +164,9 @@ ggplot(feature_removal_results, aes(x = reorder(Feature, -MCC), y = MCC)) +
   coord_flip() +
   labs(title = "Impact of Feature Removal on MCC", x = "Feature", y = "MCC") +
   theme_minimal() +
-  theme(axis.text = element_text(size = 10), axis.title = element_text(size = 12))
+  theme(axis.text = element_text(size = 8), axis.title = element_text(size = 12))
 
-ggsave("feature_removal_mcc_plot.png", width = 10, height = 6, dpi = 300)
+ggsave("feature_removal_mcc_plot.png", width = 10, height = 8, dpi = 300)
 
 ################################################################################
 # Sanity Check: Adding Noise to Data
