@@ -1,63 +1,4 @@
 
-# read series matrix file
-seriesmatrix <- read.delim("GSE54514_series_matrix.txt", header = TRUE, stringsAsFactors = FALSE, skip = 71)
-write.csv(seriesmatrix, "expression_dataGSE54514.csv", row.names = TRUE)
-
-# read gplfile
-gpl <- read.delim("GPL6947_HumanHT-12_V3_0_R1_11283641_A.bgx", header = TRUE, stringsAsFactors = FALSE, sep = "\t", row.names = NULL, skip = 8)
-write.csv(gpl, "gpl6947_GSE54514.csv", row.names = FALSE)
-
-# extract the gene symbol and probe_id
-sub_gpl <- gpl[, c("ILMN_Gene", "Symbol", "Probe_Id")]
-
-#bind the sub-gpl to expression data
-expression_with_sumbol <- merge(seriesmatrix, sub_gpl, by.x = "ID_REF", by.y = "Probe_Id", all.x = TRUE)
-write.csv(expression_with_sumbol, "expression_with_symbolGSE54514.csv", row.names = TRUE)
-
-genes_of_interest <- c(
-  "CALCA", "CRP", "TREM1", "PLAUR", "LBP", "IL6", "HMGB1", "ELANE", "CXCL8",
-  "IL10", "IL1B", "S100A8", "S100A9", "S100A12", "CD14", "FCGR1A", "ITGAM", "C3AR1",
-  "C5AR1", "LCN2", "CXCL10", "IFNG", "IFNA1", "IFNA2", "IFNB1", "CCL19", "CCL25", "CX3CR1",
-  "P2RX7", "PTX3", "TNFSF10", "MMP8", "MMP9", "HLA-DRA", "HLADRA", "TNF", "MYD88", "NLRP3",
-  "TLR2", "TLR4", "NOTCH1", "BCL2", "PDCD1", "CCL2", "ARG1", "IL1R2", "CD177",
-  "OLFM4", "MAPK14", "VCAM1", "ICAM1", "SOCS3", "GATA3", "CCR7", "CCR2", "HIF1A"
-)
-
-present_genes <- genes_of_interest[genes_of_interest %in% expression_with_sumbol$Symbol]
-missing_genes <- genes_of_interest[!genes_of_interest %in% expression_with_sumbol$Symbol]
-
-write.csv(present_genes, "present_genesGSE54514.csv", row.names = TRUE)
-write.csv(missing_genes, "missing_genesGSE54514.csv", row.names = TRUE)
-
-
-# search for aliases genes
-alias_genes <- c(
-  "IFNA1", "IFNA2", "IFNB1",
-  "ELANE", "HLE", "PMN-E", "ELA2", "HNE", "NE",
-  "MDNCF", "NAP-1", "GCP-1", "SCYB8", "LYNAP", "IL-8", "IL8",
-  "CGRP-Alpha", "Calcitonin", "CALC1", "CGRP", "PCT", "CGRP1",
-  "PTX1", "C-Reactive Protein", "Pentraxin 1",
-  "BPIFD2", "Lipopolysaccharide Binding Protein",
-  "PTX3", "TSG-14", "TNFAIP5", "TSG14"
-  )
-
-# reload the expression with symbol and search for aliases
-expression_with_symbol <- read.csv("expression_with_symbolGSE54514.csv", header = TRUE)
-present_alias_genes <- alias_genes[alias_genes %in% merged_data$Symbol]
-missing_alias_genes <- alias_genes[!alias_genes %in% expression_with_symbol$Symbol]
-
-
-# search for phenotype data
-geo_data <- getGEO("GSE54514", GSEMatrix = TRUE)
-
-pheno_data <- pData(geo_data[[1]])
-colnames(pheno_data)
-
-sub_pheno_data <- pheno_data[, c("geo_accession", "characteristics_ch1.1")]
-write.csv(sub_pheno_data, "sub_pheno_dataGSE54514.csv", row.names = FALSE)
-
-feature_data <- fData(geo_data[[1]])
-
 ####################prepare data for Random-forest##########################
 ############################################################################
 
@@ -67,28 +8,12 @@ untar("GSE54514/GSE54514_RAW.tar", exdir= 'data/')
 
 raw_data <- ReadAffy(celfile.path = "/home/rstudio/sepsis/data/") # Raw data is not available
 
-############################################################################
-# Reload the data
-expression <- read.csv("expression_with_symbolGSE54514.csv")
-
-# trim the data
-expression <-  dplyr::select(expression, -c("X", "ID_REF", "ILMN_Gene"))
-expression <- expression[rowSums(is.na(expression)) < ncol(expression), ]
-write.csv(expression, "expression_with_symbolGSE54514.csv", row.names = FALSE)
-
-# Filter the genes of interest in expression data
-filtered_genes <- expression %>%
-  filter(Symbol %in% genes_of_interest)
-
-write.csv(filtered_genes, "filtered_genes_expressionGSE54514.csv", row.names = FALSE)
-
-#### there are duplication for some genes in dataset
 
 ################################################################################
 #########################prepare dataset for RF#################################
 ################################################################################
 
-# Retrive the datasets list
+# Retrieve the datasets list
 geo_data <- getGEO("GSE54514", GSEMatrix = TRUE)
 
 # Retrieve the expression data
@@ -98,7 +23,13 @@ non_norm <- read.delim("GSE54514_non-normalized.txt", header = TRUE, sep = "\t",
 
 ###### this dataset is already normalized based on related publication
 
-# Retrieve the annoatation data for gene symbol
+# Retrieve the phenotype data
+pheno_data <- pData(geo_data[[1]])
+sub_pheno <- pheno_data[, c(2,43)]
+write.csv(pheno_data, "pheno_data.csv", row.names = FALSE)
+
+
+# Retrieve the annotation data for gene symbol
 featuere_data <- fData(geo_data[[1]])
 sub_feature <- featuere_data[, c(1, 14)]
 
@@ -168,16 +99,17 @@ transposed_merged <- merge(transposed_data, sub_pheno, by.x = "Sample", by.y = "
 transposed_merged <- transposed_merged %>%
   rename_with(~"Label", matches("disease"))
 
-# Make a diagnostic dataset
+# Make a diagnostic dataset- sepsis patients all days, D1-D5
 sepsis_diagnosis_data <- transposed_merged %>%
   mutate(Label = case_when(
     Label == "sepsis nonsurvivor" ~ "Sepsis",
     Label == "sepsis survivor" ~ "Sepsis",
     TRUE ~ Label
   ))
+
 write.csv(sepsis_diagnosis_data, "sepsis_diagnosis_dataGSE54514.csv", row.names = FALSE)
 
-# Make prognosis dataset
+# Make prognosis dataset- sepsis patients all days, D1-D5
 sepsis_prognosis_data <- transposed_merged %>%
   mutate(Label = case_when(
     Label == "sepsis nonsurvivor" ~ "Nonsurvivor",
@@ -186,3 +118,71 @@ sepsis_prognosis_data <- transposed_merged %>%
   ))
 
 write.csv(sepsis_prognosis_data, "sepsis_prognosis_dataGSE54514.csv", row.names = FALSE)
+
+######################################## Day1 ##################################
+
+# REtrieve the pheno data
+pheno_data <- pData(geo_data[[1]])
+sub_pheno <- pheno_data[, c(2,45)]
+
+# Merged phenotype data to expression data to identify sepsis and healthy cases
+transposed_merged <- merge(transposed_data, sub_pheno, by.x = "Sample", by.y = "geo_accession", all.x = TRUE)
+
+# Define the target column
+transposed_merged <- transposed_merged %>%
+  rename_with(~"Label", matches("group"))
+
+# Filter sepsis patients for D1 and healthy one 
+sepsis_D1 <- transposed_merged %>%
+  filter(Label %in% c("HC_D1", "HC_D5", "NS_D1", "S_D1")) %>%
+  mutate(Label = case_when(
+    Label %in% c("HC_D1", "HC_D5") ~ "Control",
+    Label %in% c("NS_D1", "S_D1") ~ "Sepsis"
+  ))
+
+write.csv(sepsis_D1, "sepsis_D1_GSE54514.csv", row.names = FALSE)
+
+############################## Day2 ############################################
+
+# Filter sepsis patients for D2 and healthy one 
+sepsis_D2 <- transposed_merged %>%
+  filter(Label %in% c("HC_D1", "HC_D5", "NS_D2", "S_D2")) %>%
+  mutate(Label = case_when(
+    Label %in% c("HC_D1", "HC_D5") ~ "Control",
+    Label %in% c("NS_D2", "S_D2") ~ "Sepsis"
+  ))
+
+write.csv(sepsis_D2, "sepsis_D2_GSE54514.csv", row.names = FALSE)
+
+################################# Day3 #########################################
+# Filter sepsis patients for D3 and healthy one 
+sepsis_D3 <- transposed_merged %>%
+  filter(Label %in% c("HC_D1", "HC_D5", "NS_D3", "S_D3")) %>%
+  mutate(Label = case_when(
+    Label %in% c("HC_D1", "HC_D5") ~ "Control",
+    Label %in% c("NS_D3", "S_D3") ~ "Sepsis"
+  ))
+
+write.csv(sepsis_D3, "sepsis_D3_GSE54514.csv", row.names = FALSE)
+
+################################ Day4 ##########################################
+# Filter sepsis patients for D4 and healthy one 
+sepsis_D4 <- transposed_merged %>%
+  filter(Label %in% c("HC_D5", "NS_D4", "S_D4")) %>%
+  mutate(Label = case_when(
+    Label %in% c("HC_D5") ~ "Control",
+    Label %in% c("NS_D4", "S_D4") ~ "Sepsis"
+  ))
+
+write.csv(sepsis_D4, "sepsis_D4_GSE54514.csv", row.names = FALSE)
+
+############################# Day5 #############################################
+
+sepsis_D5 <- transposed_merged %>%
+  filter(Label %in% c("HC_D5", "NS_D5", "S_D5")) %>%
+  mutate(Label = case_when(
+    Label %in% c("HC_D5") ~ "Control",
+    Label %in% c("NS_D5", "S_D5") ~ "Sepsis"
+  ))
+
+write.csv(sepsis_D5, "sepsis_D5_GSE54514.csv", row.names = FALSE)
