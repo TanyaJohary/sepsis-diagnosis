@@ -99,7 +99,8 @@ sub_pheno <- sub_pheno %>%
   mutate(title= case_when(
     grepl("CON", title) ~ "Control",
     grepl("SEP", title) ~ "Sepsis"
-  ))
+  )) %>%
+  rename_with(~"Label", matches("title"))
 
 # Prepare raw data for deseq2
 rownames(raw_data) <- raw_data$GeneID
@@ -109,23 +110,30 @@ raw_data <- raw_data[, -1]
 dds <- DESeqDataSetFromMatrix(
   countData = raw_data,
   colData = sub_pheno,
-  design = ~title
+  design =~ Label
 )
 
 # Perform Deseq normalization
 dds <- DESeq(dds)
 
-# Obtain normalized count
-count_normalized <- counts(dds , normalized = TRUE)
-write.csv(count_normalized, "normalized_counts_Deseq2GSE211210.csv", row.names = FALSE)
+# Remove low-expression genes
+dds <- dds[rowSums(counts(dds)) > 10, ]
+
+# Apply Variance Stabilizing Transformation (VST) with blind = FALSE for ML
+vsd <- vst(dds, blind = FALSE)
+
+# Extract transformed expression matrix
+normalized_data <- assay(vsd)
+
+write.csv(normalized_data, "normalized_Deseq2GSE211210.csv", row.names = FALSE)
 
 # Load the annotation file
 annotation_data <- read.delim("Human.GRCh38.p13.annot.tsv", header = TRUE, sep = "\t", stringsAsFactors = FALSE)
 sub_annot <- annotation_data[, c(1,2)]
 
 # Merge annotation data to normalized data to map teh genes
-merged_normalized <- merge(count_normalized, sub_annot, by.x = "row.names", by.y = "GeneID", all.x = TRUE)
-write.csv(merged_normalized, "merged_normalized_Deseq2GSE211210.csv", row.names = FALSE)
+merged_normalized <- merge(normalized_data, sub_annot, by.x = "row.names", by.y = "GeneID", all.x = TRUE)
+write.csv(merged_normalized, "normalized_with_symbolsGSE211210.csv", row.names = FALSE)
 
 # Search for genes of interest
 genes_of_interest <- c(
@@ -164,9 +172,5 @@ transposed_norm <- filtered_norm %>%
 
 # Merge to the sub pheno data to identify sepsis and healthy controls
 sepsis_normalized <- merge(transposed_norm, sub_pheno, by.x = "Sample", by.y = "geo_accession", all.x = TRUE)
-
-# Define the target column as Label
-sepsis_normalized <- sepsis_normalized %>%
-  rename_with(~"Label", matches("title"))
-write.csv(sepsis_normalized, "sepsis_Deseq_normGSE211210.csv", row.names = FALSE)  
+write.csv(sepsis_normalized, "sepsis_dataGSE211210.csv", row.names = FALSE)  
 
