@@ -9,10 +9,10 @@ pacman::p_load(dplyr, readr, ggplot2, corrr, rcompanion, ggrepel, tidyr, ggVennD
 ###############################################################################
 # 2. Read Input Data
 ###############################################################################
-mann_whitney_results <- read_csv("~/sepsis/MWU-tops/mann_whitney_results_adjusted_all_GSE185263.csv")
-rf_importance        <- read_csv("~/sepsis/average-feature-importance/average_feature_importance_SMOTE_GSE185263.csv")
+mann_whitney_results <- read_csv("~/sepsis/MWU-tops/mann_whitney_results_adjusted_GSE65682.csv")
+rf_importance        <- read_csv("~/sepsis/average-feature-importance/average_feature_importance_SMOTE_GSE65682.csv")
 
-data <- read.csv("sepsis_dataGSE185263.csv")
+data <- read.csv("sepsis_dataGSE65682.csv")
 
 ###############################################################################
 # 3. Prepare Mann-Whitney Ranking
@@ -23,19 +23,18 @@ mann_whitney_ranking <- mann_whitney_results %>%
   dplyr::arrange(adjusted_p) %>%
   dplyr::mutate(Rank_Stat = dplyr::row_number())  # 1 = most significant
 
-write_csv(mann_whitney_ranking, "mann-w-rankingGSE185263.csv")
+write_csv(mann_whitney_ranking, "mann-w-rankingGSE65682.csv")
 
 ###############################################################################
 # 4. Prepare Random Forest Ranking
 ###############################################################################
 rf_ranking <- rf_importance %>%
   as.data.frame() %>%
-  dplyr::select(Feature, Mean_Importance) %>%
-  dplyr::arrange(desc(Mean_Importance)) %>%
-  dplyr::mutate(Rank_RF = dplyr::row_number()) %>%
-  dplyr::rename(Gene = Feature)
+  dplyr::select(Gene, MeanImportance) %>%
+  dplyr::arrange(desc(MeanImportance)) %>%
+  dplyr::mutate(Rank_RF = dplyr::row_number())
 
-write_csv(rf_ranking, "rf-ranking-GSE185263.csv")
+write_csv(rf_ranking, "rf-ranking-GSE65682.csv")
 ###############################################################################
 # 5. Merge Rankings & Compute Rank Difference
 ###############################################################################
@@ -44,7 +43,7 @@ merged_ranking <- dplyr::inner_join(mann_whitney_ranking, rf_ranking, by = "Gene
     Rank_Diff = abs(Rank_Stat - Rank_RF)
   )
 
-write_csv(merged_ranking, "merged_rankings_comparison_GSE185263.csv")
+write_csv(merged_ranking, "merged_rankings_comparison_GSE65682.csv")
 
 ###############################################################################
 # 6. Correlations and Formal Tests
@@ -83,7 +82,7 @@ kendall_df <- data.frame(
 )
 
 cor_test_results <- rbind(spearman_df, kendall_df)
-write_csv(cor_test_results, "correlation_test_results_GSE185263.csv")
+write_csv(cor_test_results, "correlation_test_results_GSE65682.csv")
 
 ###############################################################################
 # 7. Plot: Mann–Whitney vs. RF Ranks (color by Rank Diff)
@@ -111,7 +110,7 @@ p_comparison <- ggplot(merged_ranking, aes(x = Rank_Stat, y = Rank_RF, color = R
     plot.subtitle = element_text(size = 12, color = "darkgray")
   )
 
-ggsave("comparison_ranks_GSE185263.png", p_comparison, width = 6, height = 5, dpi = 300)
+ggsave("comparison_ranks_GSE65682.png", p_comparison, width = 6, height = 5, dpi = 300)
 print(p_comparison)
 
 ###############################################################################
@@ -126,7 +125,7 @@ p_hist_diff <- ggplot(merged_ranking, aes(x = Rank_Diff)) +
   ) +
   theme_minimal(base_size = 14)
 
-ggsave("hist_rank_diff_GSE185263.png", p_hist_diff, width = 6, height = 4, dpi = 300)
+ggsave("hist_rank_diff_GSE65682.png", p_hist_diff, width = 6, height = 4, dpi = 300)
 print(p_hist_diff)
 
 ###############################################################################
@@ -147,7 +146,7 @@ p_bar_diff <- ggplot(top_discrepancies, aes(x = reorder(Gene, Rank_Diff), y = Ra
   ) +
   theme_minimal(base_size = 14)
 
-ggsave("bar_top_discrepancies_GSE185263.png", p_bar_diff, width = 6, height = 4, dpi = 300)
+ggsave("bar_top_discrepancies_GSE65682.png", p_bar_diff, width = 6, height = 4, dpi = 300)
 print(p_bar_diff)
 
 ###############################################################################
@@ -162,7 +161,7 @@ p_hist_pval <- ggplot(mann_whitney_ranking, aes(x = adjusted_p)) +
   ) +
   theme_minimal(base_size = 14)
 
-ggsave("hist_mannwhitney_pvals_GSE185263.png", p_hist_pval, width = 6, height = 4, dpi = 300)
+ggsave("hist_mannwhitney_pvals_GSE65682.png", p_hist_pval, width = 6, height = 4, dpi = 300)
 print(p_hist_pval)
 
 ###############################################################################
@@ -178,7 +177,7 @@ merged_ranking <- merged_ranking %>%
 
 # (a) Fit a linear model to Mean_Importance ~ log10(adjusted_p)
 # Add a small constant (1e-10) to prevent log(0) errors
-model_lm <- lm(Mean_Importance ~ log10(adjusted_p + 1e-10), data = merged_ranking)
+model_lm <- lm(MeanImportance ~ log10(adjusted_p + 1e-10), data = merged_ranking)
 
 # (b) Create a new column with predicted values from this model
 merged_ranking <- merged_ranking %>%
@@ -188,10 +187,10 @@ merged_ranking <- merged_ranking %>%
 #     - "Highly significant" means adjusted_p < 1e-4
 #     - "Above the line" means Mean_Importance > predicted_importance
 highlight_genes <- merged_ranking %>%
-  filter(adjusted_p < 1e-4, Mean_Importance > predicted_importance)
+  filter(adjusted_p < 1e-4, MeanImportance > predicted_importance)
 
 # (d) Plot with gene labels for the highlight set
-p_scatter_pval_importance_labeled <- ggplot(merged_ranking, aes(x = adjusted_p, y = Mean_Importance)) +
+p_scatter_pval_importance_labeled <- ggplot(merged_ranking, aes(x = adjusted_p, y = MeanImportance)) +
   geom_point(alpha = 0.8, color = "#847FE5") +  # Scatter plot points
   geom_smooth(method = "lm", se = FALSE, color = "#FF4867") +  # Regression line
   scale_x_log10() +  # Log-scale for p-values
@@ -211,7 +210,7 @@ p_scatter_pval_importance_labeled <- ggplot(merged_ranking, aes(x = adjusted_p, 
   )
 
 # (e) Save the plot
-ggsave("scatter_pval_importance_labeled_GSE185263.png", p_scatter_pval_importance_labeled, width = 7, height = 5, dpi = 300)
+ggsave("scatter_pval_importance_labeled_GSE65682.png", p_scatter_pval_importance_labeled, width = 7, height = 5, dpi = 300)
 
 # (f) Ensure the plot is displayed in RStudio
 print(p_scatter_pval_importance_labeled)
@@ -220,7 +219,7 @@ print(p_scatter_pval_importance_labeled)
 # 13. Effect Size Calculations (Using rcompanion::wilcoxonR)
 ###############################################################################
 # 1) Pivot from wide -> long to get columns: [Sample, Label, Gene, Expression].
-long_data <- long_data %>%
+long_data <- data %>%
   mutate(Label = factor(Label, levels = c("Healthy", "Sepsis")))  # Ensure order is correct
 
 long_data <- data %>%
@@ -271,7 +270,7 @@ final_merged <- merged_ranking %>%
   left_join(effect_sizes, by = "Gene")
 
 # (c) Save final table
-write.table(final_merged, "final_merged_with_effect_sizes_GSE185263.csv", row.names = FALSE, quote = FALSE)
+write.table(final_merged, "final_merged_with_effect_sizes_GSE65682.csv", row.names = FALSE, quote = FALSE)
 
 # (d) Quick check
 colnames(final_merged)
@@ -298,7 +297,7 @@ p_venn <- ggVennDiagram(venn_sets, label_alpha = 0) +
   scale_fill_gradient(low = "#FEEBD0", high = "#F0A789") +
   labs(title = "Overlap of Top 10 Genes: MW vs. RF")
 
-ggsave("venn_top10_mw_rf_GSE185263.png", p_venn, width = 5, height = 4, dpi = 300)
+ggsave("venn_top10_mw_rf_GSE65682.png", p_venn, width = 5, height = 4, dpi = 300)
 print(p_venn)
 
 
@@ -311,7 +310,7 @@ print(overlap_genes)
 
 # 5) (Optional) Save to a CSV
 write.csv(data.frame(OverlapGenes = overlap_genes),
-          "top10_overlap_genes_GSE185263.csv",
+          "top10_overlap_genes_GSE65682.csv",
           row.names = FALSE)
 
 ###############################################################################
@@ -341,7 +340,7 @@ boot_ci <- boot.ci(boot_res, type = "perc")
 cat("Bootstrap 95% CI for Spearman correlation (percentile):\n")
 print(boot_ci$percent[4:5])  # lower, upper bounds
 
-write.csv(boot_res$t, "boot_spearman_samples_GSE185263.csv", row.names=FALSE)
+write.csv(boot_res$t, "boot_spearman_samples_GSE65682.csv", row.names=FALSE)
 
 ###############################################################################
 # End of Script
