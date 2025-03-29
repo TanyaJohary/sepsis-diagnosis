@@ -9,8 +9,8 @@ pacman::p_load(dplyr, readr, ggplot2, corrr, rcompanion, ggrepel, tidyr, ggVennD
 ###############################################################################
 # 2. Read Input Data
 ###############################################################################
-mann_whitney_results <- read_csv("~/sepsis/MWU-tops/mann_whitney_results_adjusted_all_GSE185263.csv")
-rf_importance        <- read_csv("~/sepsis/average-feature-importance/average_feature_importance_SMOTE_GSE185263.csv")
+mann_whitney_results <- read_csv("mann_whitney_results_adjusted_GSE185263.csv")
+rf_importance        <- read_csv("average_feature_importance_SMOTE_GSE185263.csv")
 
 data <- read.csv("sepsis_dataGSE185263.csv")
 
@@ -32,9 +32,9 @@ rf_ranking <- rf_importance %>%
   as.data.frame() %>%
   dplyr::select(Feature, Mean_Importance) %>%
   dplyr::arrange(desc(Mean_Importance)) %>%
-  dplyr::mutate(Rank_RF = dplyr::row_number()) %>%
-  dplyr::rename(Gene = Feature)
-
+  dplyr::mutate(Rank_RF = dplyr::row_number()) %>% 
+  rename_with(~"Gene", matches("Feature"))
+  
 write_csv(rf_ranking, "rf-ranking-GSE185263.csv")
 ###############################################################################
 # 5. Merge Rankings & Compute Rank Difference
@@ -188,7 +188,7 @@ merged_ranking <- merged_ranking %>%
 #     - "Highly significant" means adjusted_p < 1e-4
 #     - "Above the line" means Mean_Importance > predicted_importance
 highlight_genes <- merged_ranking %>%
-  filter(adjusted_p < 1e-4, Mean_Importance > predicted_importance)
+  filter(adjusted_p < 0.005, Mean_Importance > predicted_importance)
 
 # (d) Plot with gene labels for the highlight set
 p_scatter_pval_importance_labeled <- ggplot(merged_ranking, aes(x = adjusted_p, y = Mean_Importance)) +
@@ -220,8 +220,8 @@ print(p_scatter_pval_importance_labeled)
 # 13. Effect Size Calculations (Using rcompanion::wilcoxonR)
 ###############################################################################
 # 1) Pivot from wide -> long to get columns: [Sample, Label, Gene, Expression].
-long_data <- long_data %>%
-  mutate(Label = factor(Label, levels = c("Healthy", "Sepsis")))  # Ensure order is correct
+long_data <- data %>%
+  mutate(Label = factor(Label, levels = c("healthy", "sepsis")))  # Ensure order is correct
 
 long_data <- data %>%
   pivot_longer(
@@ -280,39 +280,36 @@ head(final_merged)
 ###############################################################################
 # (2) TOP-N OVERLAP / VENN DIAGRAM
 ###############################################################################
-# Compare top 10 from Mann–Whitney vs. top 10 from RF
-top_10_mw <- mann_whitney_ranking %>%
-  slice_head(n = 10) %>%
-  pull(Gene)
+library(ggVennDiagram)
 
-top_10_rf <- rf_ranking %>%
-  slice_head(n = 10) %>%
-  pull(Gene)
+# 1. Prepare top 10 gene sets
+top_10_mw <- mann_whitney_ranking %>% slice_head(n = 10) %>% pull(Gene)
+top_10_rf <- rf_ranking %>% slice_head(n = 10) %>% pull(Gene)
 
 venn_sets <- list(
-  "Top 10 MW" = top_10_mw,
-  "Top 10 RF" = top_10_rf
+  "MWU" = top_10_mw,
+  "RF" = top_10_rf
 )
 
-p_venn <- ggVennDiagram(venn_sets, label_alpha = 0) +
-  scale_fill_gradient(low = "#FEEBD0", high = "#F0A789") +
-  labs(title = "Overlap of Top 10 Genes: MW vs. RF")
-
-ggsave("venn_top10_mw_rf_GSE185263.png", p_venn, width = 5, height = 4, dpi = 300)
-print(p_venn)
-
-
-# 3) Find overlap (intersection) of these two vectors
+# 2. Get overlap
 overlap_genes <- intersect(top_10_mw, top_10_rf)
 
-# 4) Print them
-cat("Overlap Genes:\n")
-print(overlap_genes)
+# 3. Create Venn with gene labels in overlap
+p_venn <- ggVennDiagram(venn_sets, label_alpha = 0, label = "count") +
+  scale_fill_gradient(low = "#FFADAD", high = "#FF6361") +
+  labs(
+    title = "Top 10 Genes: Mann–Whitney vs. Random Forest",
+    subtitle = paste0("Overlap (", length(overlap_genes), " genes): ", 
+                      paste(overlap_genes, collapse = ", "))
+  ) +
+  theme(
+    plot.subtitle = element_text(size = 10, color = "gray30", margin = margin(t = 10))
+  )
 
-# 5) (Optional) Save to a CSV
-write.csv(data.frame(OverlapGenes = overlap_genes),
-          "top10_overlap_genes_GSE185263.csv",
-          row.names = FALSE)
+# 4. Save & print
+ggsave("venn_top10_mw_rf_GSE185263_labeled.png", p_venn, width = 10, height = 5, dpi = 300)
+print(p_venn)
+
 
 ###############################################################################
 # (7) BOOTSTRAPPED SPEARMAN CORRELATION
