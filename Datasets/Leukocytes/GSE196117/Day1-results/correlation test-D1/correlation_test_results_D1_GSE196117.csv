@@ -1,3 +1,0 @@
-Test,Estimate,Statistic,P_Value,Alternative_Hypothesis
-Spearman,0.9500080632156103,1240.000000000003,0,two.sided
-Kendall,0.8185776487663279,8.65255276099277,5.036006222143213e-18,two.sided
