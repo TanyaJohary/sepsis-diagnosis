@@ -46,24 +46,26 @@ This project uses publicly available gene expression datasets from the NCBI Gene
 
 🔧 Training Datasets
 
-GSE185263	    https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE185263
-GSE65682	  	https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE65682
-GSE236713	  	https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE236713
-GSE131761	  	https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE131761
-GSE154918	  	https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE154918
-GSE69063	  	https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE69063
-GSE57065	  	https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE57065
-GSE100159	  	https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE100159
-GSE243217	  	https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE243217
-GSE28750	  	https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE28750
-GSE54514	  	https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE54514
+GSE185263 - https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE185263  
+GSE65682  - https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE65682  
+GSE236713 - https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE236713  
+GSE131761 - https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE131761  
+GSE154918 - https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE154918  
+GSE69063  - https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE69063  
+GSE57065  - https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE57065  
+GSE100159 - https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE100159  
+GSE243217 - https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE243217  
+GSE28750  - https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE28750  
+GSE54514  - https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE54514  
+
 
 
 ✅ Validation Datasets
 
-GSE69528	  	https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE69528
-GSE60424	  	https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE60424
-GSE63311	  	https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE63311
+GSE69528  - https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE69528  
+GSE60424  - https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE60424  
+GSE63311  - https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE63311  
+
 
 
 
