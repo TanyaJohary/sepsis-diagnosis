@@ -8,10 +8,26 @@ This repository hosts a computational pipeline for identifying and prioritizing 
 
 Sepsis is a life-threatening condition caused by a dysregulated host response to infection. Early diagnosis remains a major challenge due to its heterogeneous nature. This project explores gene expression data from multiple public datasets to discover consistent transcriptomic signals associated with sepsis, and to define a compact, interpretable diagnostic signature.
 
-Key objectives of this project:
-- Detect robust sepsis-associated genes across heterogeneous transcriptomic datasets.
-- Develop a compact, high-performing gene panel using ML-based feature selection.
-- Validate the biological coherence of the gene signature using protein–protein interaction networks and pathway enrichment.
+🎯 Key Objectives of this project:
+
+🧪 Technical Objectives
+
+Investigate multiple independent transcriptomic datasets from public GEO studies to identify reproducible sepsis biomarkers.
+
+Apply rigorous statistical testing (Mann–Whitney U test, correlation filtering, effect size) to detect differentially expressed genes.
+
+Use machine learning algorithms (Random Forest, stability ranking) for robust feature selection and model development.
+
+Validate model generalizability across training datasets and assess biological coherence in independent external datasets.
+
+
+🧬 Biological Objectives
+
+Prioritize biologically relevant genes associated with innate immunity, immune suppression, and neutrophil activity.
+
+Cluster gene signatures using protein–protein interaction networks (STRING) and enrich them through functional annotation tools (g:Profiler).
+
+Interpret sepsis-related pathways to ensure biological relevance and coherence of the diagnostic gene signature.
 
 ---
 
