@@ -40,3 +40,28 @@ The analysis pipeline involves the following stages:
   - *Neutrophil-driven inflammation*
 
 ---
+
+## 📁 Repository Structure
+
+The project directory is organized into logical folders for datasets, analysis outputs, and notebooks. Each training dataset folder contains both the dataset and the corresponding analysis code and results.
+
+├── Frequency Results/          # Frequency of gene selection across datasets by different methods
+├── Functional Analysis/        # Enrichment analysis results (STRING, g:Profiler)
+├── Genes/                      # Sepsis-related gene panels and annotation files
+├── Tests outputs/              # Outputs from different tests (MWU, correlation)
+├── Top Genes Validation/       # Evaluation of top-ranked gene sets across 11 investigated datasets
+├── Training Datasets/          # Dataset-specific directories with code and outputs
+│   ├── GSE185263/
+│   │   ├── GSE185263code.R              # Code for preprocessing and analysis
+│   │   ├── sepsis_dataGSE185263.csv     # Final filtered gene expression matrix
+│   │   ├── RF-results/                  # Random Forest ranking code + results
+│   │   ├── Mann-W-U test/               # Mann–Whitney U test code + results
+│   │   ├── correlation test/            # Correlation filter code + results
+│   │   └── top25percentile/             # Top 25% selection logic + results
+│   └── ... (other GSE folders follow same format)
+├── notebook/                  # Jupyter or RMarkdown notebooks for exploratory work
+├── validation Datasets/       # Datasets used for external validation of diagnostic clusters
+├── Project on genetic diagnostic signature.pdf   # Project overview or report (PDF)
+├── LICENSE.txt                # GPL-3.0 License file
+└── README.md                  # Project overview and usage guide
+
