@@ -80,14 +80,14 @@ mann_whitney_results <- dplyr::bind_rows(mann_whitney_list) %>%
 write.csv(mann_whitney_results, "mann_whitney_results_adjusted_D1_GSE236713.csv", row.names = FALSE)
 
 # Debug: Summaries of significance
-cat("Number of genes with raw p-value < 0.05:",
-    sum(mann_whitney_results$p_value < 0.05), "\n")
-cat("Number of genes with adjusted p-value < 0.05:",
-    sum(mann_whitney_results$adjusted_p < 0.05), "\n")
+cat("Number of genes with raw p-value < 0.005:",
+    sum(mann_whitney_results$p_value < 0.005), "\n")
+cat("Number of genes with adjusted p-value < 0.005:",
+    sum(mann_whitney_results$adjusted_p < 0.005), "\n")
 
 # Separate significant and non-significant
-significant_genes <- dplyr::filter(mann_whitney_results, adjusted_p < 0.05)
-non_significant_genes <- dplyr::filter(mann_whitney_results, adjusted_p >= 0.05)
+significant_genes <- dplyr::filter(mann_whitney_results, adjusted_p < 0.005)
+non_significant_genes <- dplyr::filter(mann_whitney_results, adjusted_p >= 0.005)
 
 write_csv(significant_genes,"significant_genes_D1_GSE236713.csv")
 write_csv(non_significant_genes, "non_significant_genes_D1_GSE236713.csv")
@@ -96,7 +96,7 @@ cat("Significant genes (ordered by adjusted p-value):\n")
 print(significant_genes)
 
 ###############################################################################
-# Plot Top 25 Significant Genes, Annotating Adjusted p-values
+# Plot Top 10 Significant Genes, Annotating Adjusted p-values
 ###############################################################################
 if (nrow(significant_genes) > 0) {
   
@@ -114,7 +114,7 @@ if (nrow(significant_genes) > 0) {
   # We'll keep track of these new labels in the same order
   ordered_labels <- top_10_genes$Gene_label
   
-  # Reshape the data into long format for plotting, but only for these top 25 genes
+  # Reshape the data into long format for plotting, but only for these top 10 genes
   data_long <- data %>%
     dplyr::select(Label, dplyr::all_of(top_10_genes$Gene)) %>%
     tidyr::pivot_longer(cols = -Label, names_to = "Gene", values_to = "Expression")
@@ -135,8 +135,8 @@ if (nrow(significant_genes) > 0) {
     facet_wrap(~ Gene_label, scales = "free_y", ncol = 5) + # 5 columns of facets
     scale_fill_manual(values = c("Sepsis" = "#FF1D71", "Control" = "grey")) +
     labs(
-      title = "Expression of Top 25 Significant Genes by Sepsis Status",
-      subtitle = "Mann-Whitney U test (BH-adjusted p-value < 0.05)",
+      title = "Expression of Top 10 Significant Genes by Sepsis Status",
+      subtitle = "Mann-Whitney U test (BH-adjusted p-value < 0.005)",
       x = "Sepsis Status", 
       y = "Expression Level"
     ) +
@@ -154,7 +154,7 @@ if (nrow(significant_genes) > 0) {
          plot = p, width = 14, height = 10, dpi = 300)
   
 } else {
-  cat("No significant genes found (adjusted p-value < 0.05).\n")
+  cat("No significant genes found (adjusted p-value < 0.005).\n")
 }
 
 ################################################################################
@@ -182,3 +182,63 @@ mann_whitney_results_collapsed$Gene <- ifelse(mann_whitney_results_collapsed$Gen
 write.csv(mann_whitney_results_collapsed, "mann_whitney_results_adjusted_D1_GSE236713.csv", row.names = FALSE)
 
 cat("Final aggregated Mann-Whitney results saved in sorted order.")
+
+###############################################################################
+# Volcano Plot to visualize both statistical significance (adjusted p-values) 
+############# and effect size (like Cliff’s delta) in one shot ################
+###############################################################################
+library(ggplot2)
+library(ggrepel)
+
+# Create a volcano plot-ready dataframe
+volcano_df <- mann_whitney_results_collapsed %>%
+  mutate(
+    neg_log10_adj_p = -log10(adjusted_p),
+    significance = case_when(
+      adjusted_p < 0.005 & abs(effect_size) >= 0.474 ~ "Highly Significant",  # large effect size
+      adjusted_p < 0.005                             ~ "Significant",
+      TRUE                                           ~ "Not Significant"
+    )
+  )
+
+# Set factor levels
+volcano_df$significance <- factor(volcano_df$significance,
+                                  levels = c("Highly Significant", "Significant", "Not Significant"))
+
+# Reuse your full volcano_df with all genes
+volcano_plot <- ggplot(volcano_df, aes(x = effect_size, y = neg_log10_adj_p)) +
+  geom_point(aes(color = significance), alpha = 0.7, size = 2) +
+  geom_vline(xintercept = c(-0.474, 0.474), linetype = "dashed", color = "gray") +
+  geom_hline(yintercept = -log10(0.005), linetype = "dashed", color = "gray") +
+  annotate("text", x = 1, y = -log10(0.005) + 0.5, label = "p = 0.005", size = 3) +
+  
+  
+  # ➤ Label ONLY the highly significant genes
+  geom_text_repel(
+    data = filter(volcano_df, significance == "Highly Significant"),
+    aes(label = Gene),
+    size = 3,
+    max.overlaps = Inf,
+    force = 1.5
+  ) +
+  
+  scale_color_manual(values = c(
+    "Highly Significant" = "#E41A1C",
+    "Significant" = "#377EB8",
+    "Not Significant" = "gray70"
+  )) +
+  labs(
+    title = "Volcano Plot of All Genes (Only Highly Significant Labeled)",
+    subtitle = "Effect Size vs. -log10(BH-adjusted p-value)",
+    x = "Cliff's Delta (Effect Size)",
+    y = expression(-log[10]("Adjusted p-value")),
+    color = "Significance"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "top")
+
+# Display and save
+print(volcano_plot)
+ggsave("volcano_plot_only_highly_labeled_D1_GSE236713.png", volcano_plot,
+       width = 12, height = 7, dpi = 300)
+
