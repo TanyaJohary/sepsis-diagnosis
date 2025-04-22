@@ -19,25 +19,23 @@ Key objectives of this project:
 
 The analysis pipeline involves the following stages:
 
-### 🧮 1. Statistical Testing
+### 🌲 1. Machine Learning Feature Selection
+- **Random Forest**: Compute variable importance across multiple datasets.
+- **Feature Importance**: Computed using Mean Decrease in Gini and validated with Leave-One-Feature-Out (LOFO) analysis.
+- **Sanity check**: Assessed stability by injecting 10–50% synthetic noise into data.
+
+### 🧮 2. Statistical Testing
 - **Mann–Whitney U Test**: Evaluate differential expression between sepsis and control samples.
 - **Effect Size Calculation**: Quantify biological relevance using Cohen’s d.
-
-### 🌲 2. Machine Learning Feature Selection
-- **Random Forest**: Compute variable importance across multiple datasets.
-- **Stability Ranking**: Aggregate importance across resampled runs for robustness.
+- **Rank Concordance**: Compared statistical rankings with machine learning scores using Spearman and Kendall correlation.
 
 ### 🧬 3. Signature Construction
-- Ensemble ranking across statistical and ML-based metrics.
-- Final 15-gene panel constructed by integrating consistent top-ranking genes.
+- **Consensus Ranking**: Identified top 15 genes appearing in the top 25% across both RF and MWU rankings.
+- **Cross-Dataset Aggregation**: Prioritized genes showing high recurrence across datasets.**
 
 ### 🔗 4. Biological Validation
-- **STRING PPI Network**: Explore interactions and functional modules.
-- **Enrichment Analysis**: Validate pathways using Gene Ontology and KEGG.
-- Group genes into meaningful modules:
-  - *Innate immune activation*
-  - *Immunosuppression*
-  - *Neutrophil-driven inflammation*
+- **STRING PPI Network**: Explore interactions networks of top genes and functional modules.
+- **Functional Enrichment**: Annotated gene clusters using g:Profiler (g:GOSt).
 
 ---
 
