@@ -206,7 +206,7 @@ volcano_df <- mann_whitney_results_collapsed %>%
 volcano_df$significance <- factor(volcano_df$significance,
                                   levels = c("Highly Significant", "Significant", "Not Significant"))
 
-# Reuse your full volcano_df with all genes
+# Reuse our full volcano_df with all genes
 volcano_plot <- ggplot(volcano_df, aes(x = effect_size, y = neg_log10_adj_p)) +
   geom_point(aes(color = significance), alpha = 0.7, size = 2) +
   geom_vline(xintercept = c(-0.474, 0.474), linetype = "dashed", color = "gray") +
