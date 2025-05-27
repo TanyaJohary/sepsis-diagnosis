@@ -20,8 +20,14 @@ sub_pheno <- sub_pheno %>%
 sub_pheno$Label <- as.character(sub_pheno$Label)  # Convert factor to character
 sub_pheno$title <- as.character(sub_pheno$title)  # Convert title column to character
 
-# Replace NA values in Label where the title is "healthy subject"
+# Clean up whitespace and hidden characters
+sub_pheno$Label <- trimws(sub_pheno$Label)            # Remove leading/trailing spaces
+sub_pheno$Label <- gsub("[\r\n]", "", sub_pheno$Label)  # Remove newline characters
+
+# Now replace any "NA" string with actual NA
 sub_pheno$Label[sub_pheno$Label == "NA"] <- NA
+table(sub_pheno$Label, useNA = "always") #see "NA" disappear and <NA> increase.
+
 sub_pheno$Label[which(sub_pheno$title == "healthy subject" & is.na(sub_pheno$Label))] <- "healthy"
 
 sub_pheno <- sub_pheno %>% 
