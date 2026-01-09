@@ -110,3 +110,11 @@ Each training dataset folder contains both the dataset and the corresponding ana
 └── README.md                 # Project overview and usage guide
 
 
+
+📧 Contact
+
+For questions, feedback, or collaborations, feel free to contact us at:
+
+ tanya.johary@gmail.com
+ davide.chicco@gmail.com
+ 
