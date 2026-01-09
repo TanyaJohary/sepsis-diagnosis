@@ -42,7 +42,7 @@ The analysis pipeline involves the following stages:
 
 ### 🧮 2. Statistical Testing
 - **Mann–Whitney U Test**: Evaluate differential expression between sepsis and control samples.
-- **Effect Size Calculation**: Quantify biological relevance using Cohen's d.
+- **Effect Size Calculation**: Quantify biological relevance using Cohen’s d.
 - **Rank Concordance**: Compared statistical rankings with machine learning scores using Spearman and Kendall correlation.
 
 ### 🧬 3. Signature Construction
@@ -55,8 +55,7 @@ The analysis pipeline involves the following stages:
 
 ---
 
-## 📊 Datasets
-
+📊 Datasets
 This project uses publicly available gene expression datasets from the NCBI Gene Expression Omnibus (GEO). Eleven datasets were used to train the diagnostic model, and three datasets were used for validation.
 
 🔧 Training Datasets
@@ -81,7 +80,6 @@ GSE69528  - https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE69528
 GSE60424  - https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE60424  
 GSE63311  - https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE63311  
 
----
 
 ## 📁 Repository Structure
 
