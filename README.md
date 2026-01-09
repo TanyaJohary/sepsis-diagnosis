@@ -81,8 +81,6 @@ GSE60424  - https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE60424
 GSE63311  - https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE63311  
 
 
-
-
 ## 📁 Repository Structure
 
 The project directory is organized into logical folders for datasets, analysis outputs, and notebooks.  
@@ -111,8 +109,9 @@ Each training dataset folder contains both the dataset and the corresponding ana
 
 
 
- ## Contact: For questions, feedback, or collaborations, feel free to contact us at:
+## 📧 Contact
 
-📧 tanya.johary@gmail.com
-📧 davide.chicco@gmail.com
- 
+For questions, feedback, or collaborations, feel free to contact us at:
+
+- tanya.johary@gmail.com  
+- davide.chicco@gmail.com
