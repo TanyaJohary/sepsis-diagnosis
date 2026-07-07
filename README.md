@@ -116,3 +116,18 @@ For questions, feedback, or collaborations, feel free to contact us at:
 
 - tanya.johary@gmail.com  
 - davide.chicco@gmail.com
+
+---
+
+## 📄 Associated Publication
+
+The methods and analyses implemented in this repository are described in the following publication:
+
+> **Johari, T. & Chicco, D.**
+>
+> **A modular transcriptomic signature paired with machine learning reveals core immune pathways in sepsis diagnosis.**
+>
+> *Discover Computing* **29**, Article 107 (2026).
+>
+> https://doi.org/10.1007/s10791-026-09974-2
+
